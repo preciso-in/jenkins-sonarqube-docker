@@ -499,13 +499,13 @@ gcloud compute ssh $JENKINS_INSTANCE_NAME
 
 ```
   jenkins@jenkins:$ ssh ubuntu@$DOCKER_IP
+  // ssh contains IP address encoding. Hence, everytime, the IP address changes, you have to recreate the SSH key and paste it in the Jenkins config.
 ```
 
 > Create a public and private key in Jenkins server
 
 ```
   @jenkins:$ ssh-keygen
-  @jenkins:$
 ```
 
 > Add key to jenkins-server (To avoid typing password again)
