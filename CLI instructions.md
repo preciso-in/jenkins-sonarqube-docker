@@ -1,17 +1,20 @@
+https://youtu.be/361bfIvXMBI
+
 ##### Set Environment Variables
 
 ```
 REGION=us-central1
-PROJECT_ID=jenkins-sonarqube-docker-2500
+PROJECT_ID=jenkins-sonarqube-docker-2504
 NETWORK_NAME=jsd-nw
 SUBNET_NAME=jsd-subnet
+STORAGE_BUCKET_NAME=startup-script-bucket-1b
 INSTANCE_TEMPLATE_NAME=jsd-instance-template
-JENKINS_INSTANCE_NAME=jenkins-server
-DOCKER_INSTANCE_NAME=docker-server
-SONARQUBE_INSTANCE_NAME=sonarqube-server
-JENKINS_NETWORK_TAG=jenkins-server
-SONARQUBE_NETWORK_TAG=sonarqube-server
-DOCKER_NETWORK_TAG=docker-server
+JENKINS_INSTANCE_NAME=ci-server
+DOCKER_INSTANCE_NAME=container-server
+SONARQUBE_INSTANCE_NAME=code-scanner-server
+JENKINS_NETWORK_TAG=ci-server
+SONARQUBE_NETWORK_TAG=scanner-server
+DOCKER_NETWORK_TAG=container-server
 ```
 
 ##### Instance lifecycle commands
@@ -20,6 +23,8 @@ DOCKER_NETWORK_TAG=docker-server
 $ gcloud compute instances stop my-instance
 $ gcloud compute instances start my-instance
 $ gcloud compute instances describe INSTANCE_NAME --format="get(status)"
+$ gcloud compute instances add-metadata my-instance \
+    --metadata serial-port-enable=TRUE
 ```
 
 ##### Create project
@@ -27,8 +32,6 @@ $ gcloud compute instances describe INSTANCE_NAME --format="get(status)"
 ```
 gcloud projects create $PROJECT_ID
 gcloud init
-gcloud config set compute/region $REGION
-gcloud config set compute/zone $REGION-a
 ```
 
 ##### List billing accounts on user
@@ -56,6 +59,13 @@ gcloud services enable compute.googleapis.com --quiet
 ```
 SVC_ACCOUNT=$(gcloud iam service-accounts list --format="value(email)")
 echo $SVC_ACCOUNT
+```
+
+##### Set Default Region and Zone on gcloud
+
+```
+gcloud config set compute/region $REGION
+gcloud config set compute/zone $REGION-a
 ```
 
 ##### Delete VPC firewall rules
@@ -87,7 +97,7 @@ gcloud compute networks create $NETWORK_NAME \
 ```
 gcloud compute networks subnets create $SUBNET_NAME \
   --network=$NETWORK_NAME \
-  --range=10.0.0.0/24 \
+  --range=10.0.20.0/24 \
   --region=$REGION
 ```
 
@@ -125,6 +135,22 @@ gcloud compute firewall-rules create allow-ssh \
 gcloud compute firewall-rules list
 ```
 
+##### Upload startup script files to Cloud Storage
+
+> Create Storage Bucket
+
+```
+gsutil mb -l $REGION gs://$STORAGE_BUCKET_NAME
+```
+
+> Upload startup scripts
+
+```
+gsutil cp jenkins-startup-script.sh gs://$STORAGE_BUCKET_NAME
+gsutil cp sonarqube-startup-script.sh gs://$STORAGE_BUCKET_NAME
+gsutil cp docker-startup-script.sh gs://$STORAGE_BUCKET_NAME
+```
+
 ##### Create instance template.
 
 // Do NOT select REGIONAL INSTANCE TEMPLATE. It does not work.
@@ -138,7 +164,7 @@ gcloud beta compute instance-templates create $INSTANCE_TEMPLATE_NAME \
   --maintenance-policy=TERMINATE \
   --provisioning-model=SPOT \
   --instance-termination-action=STOP \
-  --max-run-duration=3600s  \
+  --max-run-duration=10800s  \
   --service-account=$SVC_ACCOUNT \
   --scopes=https://www.googleapis.com/auth/devstorage.read_only,https://www.googleapis.com/auth/logging.write,https://www.googleapis.com/auth/monitoring.write,https://www.googleapis.com/auth/servicecontrol,https://www.googleapis.com/auth/service.management.readonly,https://www.googleapis.com/auth/trace.append \
   --region=us-central1 \
@@ -152,33 +178,43 @@ gcloud beta compute instance-templates list
 
 ##### Create Instances
 
+> Create Jenkins Instance
+
 ```
 gcloud compute instances create $JENKINS_INSTANCE_NAME \
-  --source-instance-template=$INSTANCE_TEMPLATE_NAME \
-  --zone=$REGION-a
+ --source-instance-template=$INSTANCE_TEMPLATE_NAME \
+ --zone=$REGION-a \
+ --tags=$JENKINS_NETWORK_TAG \
+ --metadata=startup-script-url=gs://$STORAGE_BUCKET_NAME/jenkins-startup-script.sh
+```
+
+> Create Sonarqube Instance
+
+```
 gcloud compute instances create $SONARQUBE_INSTANCE_NAME \
   --source-instance-template=$INSTANCE_TEMPLATE_NAME \
-  --zone=$REGION-a
+  --zone=$REGION-a \
+  --tags=$SONARQUBE_NETWORK_TAG \
+  --metadata=startup-script-url=gs://$STORAGE_BUCKET_NAME/sonarqube-startup-script.sh
+```
+
+> Create Docker Instance
+
+```
 gcloud compute instances create $DOCKER_INSTANCE_NAME \
   --source-instance-template=$INSTANCE_TEMPLATE_NAME \
-  --zone=$REGION-a
+  --tags=$DOCKER_NETWORK_TAG \
+  --zone=$REGION-a \
+  --metadata=startup-script-url=gs://$STORAGE_BUCKET_NAME/docker-startup-script.sh
+```
+
+> List created instances
+
+```
 gcloud compute instances list
 ```
 
-##### Install Jenkins from Jenkins IO
-
-```
-gcloud compute ssh $JENKINS_INSTANCE_NAME
-curl -fsSL https://pkg.jenkins.io/debian-stable/jenkins.io-2023.key | sudo tee \
-    /usr/share/keyrings/jenkins-keyring.asc > /dev/null
-echo deb [signed-by=/usr/share/keyrings/jenkins-keyring.asc] \
-    https://pkg.jenkins.io/debian-stable binary/ | sudo tee \
-    /etc/apt/sources.list.d/jenkins.list > /dev/null
-sudo apt-get update -y
-sudo apt-get install fontconfig openjdk-17-jre -y
-sudo apt-get install jenkins -y
-sudo apt install git -y
-```
+> You can check output of metadata scripts in the VM instance details page and then opening the Logs > "Serial port 1 (console)"
 
 ##### Check if Jenkins is running
 
@@ -196,8 +232,9 @@ exit
 
 ```
 JENKINS_SERVER_IP=$(gcloud compute instances describe $JENKINS_INSTANCE_NAME \
-  --format="value(networkInterfaces.accessConfigs[0].natIP)")
+ --format="value(networkInterfaces.accessConfigs[0].natIP)")
 echo $JENKINS_SERVER_IP
+
 ```
 
 ##### Create firewall-rule to allow access to Jenkins Server
@@ -213,9 +250,9 @@ gcloud compute instances add-tags $JENKINS_INSTANCE_NAME \
 
 ```
 gcloud compute firewall-rules create access-jenkins \
-  --direction=INGRESS \
-  --priority=1000 \
-  --network=$NETWORK_NAME \
+ --direction=INGRESS \
+ --priority=1000 \
+ --network=$NETWORK_NAME \
   --action=ALLOW \
   --rules=tcp:8080 \
   --source-ranges=0.0.0.0/0 \
@@ -262,28 +299,10 @@ echo http://$JENKINS_SERVER_IP:8080/github-webhook/
 
 > Select "Pushes" and "Pull Requests" in "Which events would you like to trigger this webhook?" > "Let me select individual events."
 
-##### Install Sonarqube on Server
-
-> Download Package
+##### Run Sonarqube on Sonarqube Server
 
 ```
-gcloud compute ssh $SONARQUBE_INSTANCE_NAME
-sudo apt update -y
-sudo apt install openjdk-17-jre unzip -y
-wget https://binaries.sonarsource.com/Distribution/sonarqube/sonarqube-10.2.0.77647.zip
-```
-
-> Install Server
-
-```
-unzip sonarqube ...
-cd sonarqube ...
-```
-
-##### Run sonarqube script for Linux
-
-```
-cd bin/linux-x86-64
+cd /usr/local/sonarqube-10.2.0.77647/bin/linux-x86-64/
 ./sonar.sh console
 ```
 
@@ -300,9 +319,9 @@ gcloud compute instances add-tags $SONARQUBE_INSTANCE_NAME \
 
 ```
 gcloud compute firewall-rules create access-sonarqube \
-  --direction=INGRESS \
-  --priority=1000 \
-  --network=$NETWORK_NAME \
+ --direction=INGRESS \
+ --priority=1000 \
+ --network=$NETWORK_NAME \
   --action=ALLOW \
   --rules=tcp:9000 \
   --source-ranges=0.0.0.0/0 \
@@ -313,8 +332,9 @@ gcloud compute firewall-rules create access-sonarqube \
 
 ```
 SONARQUBE_SERVER_IP=$(gcloud compute instances describe $SONARQUBE_INSTANCE_NAME \
-  --format="value(networkInterfaces.accessConfigs[0].natIP)")
+ --format="value(networkInterfaces.accessConfigs[0].natIP)")
 echo $SONARQUBE_SERVER_IP
+
 ```
 
 ##### Open SonarQube Server in Browser
@@ -332,17 +352,17 @@ echo $SONARQUBE_SERVER_IP:9000
 > Select Create Project Manually
 
 ```
-  Project Display Name = Onix-Website-Scan
-  Project Key = Onix-Website-Scan
-  Main Branch Name = Main
+Project Display Name = Onix-Website-Scan
+Project Key = Onix-Website-Scan
+Main Branch Name = Main
 ```
 
 > Choose the baseline for new code for this project
 
 ```
 Use the global setting.
-  Previous version
-    Any code that has changed since the previous version is considered new code.
+Previous version
+Any code that has changed since the previous version is considered new code.
 Recommended for projects following regular versions or releases.
 ```
 
@@ -363,14 +383,13 @@ Recommended for projects following regular versions or releases.
 > Go to Admin Profile at top right hand
 > A > My Account > Security > Generate Token
 > _Copy this token and keep it safe_
-> ex. sqp_122f6cf70f9080efa9834c25e62873d44c9ec0c7
+> ex. sqp_fb5ea620f218deaca5732133ce6e441be0daef3e
 
 ```
-  Name: Sonarqube-token
-  Type: Project Analysis Token
-  Project: Onix-Website-Scan
-  Expires in: 30 days
-
+Name: Jenkins-token
+Type: Project Analysis Token
+Project: Onix-Website-Scan
+Expires in: 30 days
 ```
 
 ##### Install Jenkins Plugins
@@ -396,8 +415,8 @@ Check "Install Automatically"
 > Jenkins Dashboard > Manage Jenkins > System > SonarQube Servers > "Add Sonarqube"
 
 ```
-  Name: Sonar-server
-  Server URL: $ echo http://$SONARQUBE_SERVER_IP:9000
+Name: Sonar-server
+Server URL: $ echo http://$SONARQUBE_SERVER_IP:9000
 ```
 
 > In same section, add Sonarqube token
@@ -405,7 +424,7 @@ Check "Install Automatically"
 
 ```
 Kind: Secret Text
-Secret: [SONAR_TOKEN] ex.sqp_83c9a7167185b3f91b614b90f8e17950e0aaa7bf
+Secret: [SONAR_TOKEN] ex.sqp_fb5ea620f218deaca5732133ce6e441be0daef3e
 ID: sonar-token
 ```
 
@@ -424,27 +443,7 @@ Analysis Properties: sonar.projectKey=Onix-Website-Scan
 
 > Dashboard > [JOB_NAME] > "Build Now"
 
-##### Install Docker
-
-> Install Packages
-
-```
-gcloud compute ssh $DOCKER_INSTANCE_NAME
-sudo apt-get update -y
-sudo apt-get install ca-certificates curl gnupg -y
-sudo install -m 0755 -d /etc/apt/keyrings -y
-curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
-sudo chmod a+r /etc/apt/keyrings/docker.gpg
-
-# Add the repository to Apt sources:
-echo \
-  "deb [arch="$(dpkg --print-architecture)" signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
-  "$(. /etc/os-release && echo "$VERSION_CODENAME")" stable" | \
-  sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-sudo apt-get update -y
-
-sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
-```
+##### Run Docker
 
 > Check if Docker is running
 
@@ -457,8 +456,8 @@ sudo docker run hello-world
 > Get Docker IP
 
 ```
-$ DOCKER_IP=$(gcloud compute instances describe docker-server \
-  --format="value(networkInterfaces.accessConfigs[0].natIP)")
+DOCKER_IP=$(gcloud compute instances describe $DOCKER_INSTANCE_NAME \
+ --format="value(networkInterfaces.accessConfigs[0].natIP)")
 ```
 
 > Switch to Jenkins user on jenkins server
@@ -472,63 +471,72 @@ gcloud compute ssh $JENKINS_INSTANCE_NAME
 > Add public key of Jenkins in Docker if not already done.
 
 ```
-@docker:$ sudo su     // Switch to root user
+@docker:$ sudo su // Switch to root user
 @docker:# vim /etc/ssh/sshd_config
 ```
 
 > Edit sshd_config file
 
 ```
-  Uncomment PubkeyAuthentication yes
-  PasswordAuthentication yes
+Uncomment PubkeyAuthentication yes
+PasswordAuthentication yes
 ```
 
 > Restart sshd service
 
 ```
-  # systemctl restart sshd
+# systemctl restart sshd
 ```
 
 > Add ubuntu user password in Docker server
 
 ```
-  # passwd ubuntu    // ex. 12345
+# passwd ubuntu // ex. 12345
 ```
 
 > Try SSH again from jenkins server to ssh
 
 ```
-  jenkins@jenkins:$ ssh ubuntu@$DOCKER_IP
-  // ssh contains IP address encoding. Hence, everytime, the IP address changes, you have to recreate the SSH key and paste it in the Jenkins config.
+jenkins@jenkins:$ ssh ubuntu@$DOCKER_IP
+// ssh contains IP address encoding. Hence, everytime, the IP address changes, you have to recreate the SSH key and paste it in the Jenkins config.
 ```
 
 > Create a public and private key in Jenkins server
 
 ```
-  @jenkins:$ ssh-keygen
+@jenkins:$ ssh-keygen
 ```
 
 > Add key to jenkins-server (To avoid typing password again)
 
 ```
-  @jenkins:$ ssh-copy-id ubuntu@$DOCKER_IP
+@jenkins:$ ssh-copy-id ubuntu@$DOCKER_IP
 ```
 
-> Log into the Docker server
+> Log into the Docker server and create a folder to save nginx site assets
 
 ```
-  @jenkins: $ ssh ubuntu@DOCKER_IP
+@jenkins:$ ssh ubuntu@DOCKER_IP
+@docker:$ mkdir website
+```
+
+> Grant ubuntu user access to run docker commands
+
+```
+@docker:$ sudo usermod -aG docker ubuntu
+@docker:$ newgrp docker
+@docker:$ docker ps // This should run now.
 ```
 
 ##### Create Docker build step in Jenkins
 
-> Dashboard > Manage Jenkins > System > Server groups
+> Dashboard > Manage Jenkins > System > Server groups > Server Group List
 
 ```
 Group Name: Docker-Servers
 SSH Port: 22
-User Name: Ubuntu
-Password: 12345     // Password entered when we were in Docker server as root.
+User Name: ubuntu
+Password: 12345 // Password entered when we were in Docker server as root.
 ```
 
 > Dashboard > Manage Jenkins > System > Server lists
@@ -539,9 +547,50 @@ Server Name: Docker-1
 Server IP: $DOCKER_IP
 ```
 
+> Dashboard > [JOB_NAME] > Configure > Build Steps > "Add Build Step" > "Execute Shell"
+
+```
+Command: scp -r ./* ubuntu@$DOCKER_IP:~/website/
+```
+
 > Dashboard > [JOB_NAME] > Configure > Build Steps > "Add Build Step" > "Remote Shell"
 
 ```
-Target Server: Docker-Servers~~Docker-1~~$DOCKER_IP //Available as DropDown
-shell: touch test.txt
+Target Server: Docker-Servers~~Docker-1~~$DOCKER_IP //Dropdown
+shell:
+cd /home/ubuntu/website
+docker build -t mywebsite .
+docker run -d -p 8085:80 --name=Onix-Website mywebsite
+```
+
+##### Run Jenkins Pipeline to start docker nginx server
+
+
+
+##### Allow Docker port access to internet
+
+> Add network tag for firewall-rule to apply to Jenkins Server
+
+```
+gcloud compute instances add-tags $DOCKER_INSTANCE_NAME \
+  --tags=$DOCKER_NETWORK_TAG
+```
+
+> Add Firewall rule
+
+```
+gcloud compute firewall-rules create access-docker \
+ --direction=INGRESS \
+ --priority=1000 \
+ --network=$NETWORK_NAME \
+  --action=ALLOW \
+  --rules=tcp:8085 \
+  --source-ranges=0.0.0.0/0 \
+  --target-tags=$DOCKER_NETWORK_TAG
+```
+
+##### Go to Docker IP to check website
+
+```
+$ echo http://$DOCKER_IP:8085
 ```
