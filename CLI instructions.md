@@ -1,5 +1,8 @@
 https://youtu.be/361bfIvXMBI
 
+<details>
+<summary>Environment Variables</summary>
+
 ##### Set Environment Variables
 
 ```
@@ -17,6 +20,13 @@ SONARQUBE_NETWORK_TAG=scanner-server
 DOCKER_NETWORK_TAG=container-server
 ```
 
+</details>
+<br/>
+
+<details>
+
+<summary>Housekeeping commands</summary>
+
 ##### Instance lifecycle commands
 
 ```
@@ -26,6 +36,13 @@ $ gcloud compute instances describe INSTANCE_NAME --format="get(status)"
 $ gcloud compute instances add-metadata my-instance \
     --metadata serial-port-enable=TRUE
 ```
+
+</details>
+<br/>
+
+<details>
+
+<summary>Set up Project & GCloud CLI</summary>
 
 ##### Create project
 
@@ -67,6 +84,12 @@ echo $SVC_ACCOUNT
 gcloud config set compute/region $REGION
 gcloud config set compute/zone $REGION-a
 ```
+
+</details>
+<br/>
+
+<details>
+<summary>Reset default project settings</summary>
 
 ##### Delete VPC firewall rules
 
@@ -135,9 +158,15 @@ gcloud compute firewall-rules create allow-ssh \
 gcloud compute firewall-rules list
 ```
 
+</details>
+<br/>
+
+<details>
+<summary>Instance Creation</summary>
+
 ##### Upload startup script files to Cloud Storage
 
-> Create Storage Bucket
+> Create Storage Bucket to store startup scripts
 
 ```
 gsutil mb -l $REGION gs://$STORAGE_BUCKET_NAME
@@ -216,9 +245,18 @@ gcloud compute instances list
 
 > You can check output of metadata scripts in the VM instance details page and then opening the Logs > "Serial port 1 (console)"
 
+</details>
+<br/>
+
+<details>
+<summary>Jenkins Server Startup</summary>
+
 ##### Check if Jenkins is running
 
+> Loginto Jenkins server and check service status
+
 ```
+gcloud compute ssh $JENKINS_INSTANCE_NAME
 systemctl status jenkins
 ```
 
@@ -227,6 +265,12 @@ systemctl status jenkins
 ```
 exit
 ```
+
+</details>
+<br/>
+
+<details>
+<summary>GCP Network configuration for Jenkins Server</summary>
 
 ##### Get IP address of Jenkins Server
 
@@ -265,6 +309,12 @@ gcloud compute firewall-rules create access-jenkins \
 echo $JENKINS_SERVER_IP:8080
 ```
 
+</details>
+<br/>
+
+<details>
+<summary>Jenkins Server Setup</summary>
+
 ##### Get Jenkins InitialAdminPassword
 
 ```
@@ -275,8 +325,13 @@ exit
 
 ##### Create Jenkins User
 
-> user: Nilesh
-> pwd: 12345
+> Go to $JENKINS_SERVER_IP:8080
+> Input Jenkins InitialAdminPassword
+
+```
+user: Nilesh
+pwd: 12345
+```
 
 ##### Create Freestyle Project "Automated-Pipeline"
 
@@ -299,12 +354,24 @@ echo http://$JENKINS_SERVER_IP:8080/github-webhook/
 
 > Select "Pushes" and "Pull Requests" in "Which events would you like to trigger this webhook?" > "Let me select individual events."
 
+</details>
+<br/>
+
+<details>
+<summary>Start SonarQube server</summary>
+
 ##### Run Sonarqube on Sonarqube Server
 
 ```
 cd /usr/local/sonarqube-10.2.0.77647/bin/linux-x86-64/
 ./sonar.sh console
 ```
+
+</details>
+<br/>
+
+<details>
+<summary>GCP Network configuration for SonarQube Server</summary>
 
 ##### Create firewall-rule to allow access to Sonarqube Server
 
@@ -336,6 +403,12 @@ SONARQUBE_SERVER_IP=$(gcloud compute instances describe $SONARQUBE_INSTANCE_NAME
 echo $SONARQUBE_SERVER_IP
 
 ```
+
+</details>
+<br/>
+
+<details>
+<summary>SonarQube Server Setup</summary>
 
 ##### Open SonarQube Server in Browser
 
@@ -392,6 +465,12 @@ Project: Onix-Website-Scan
 Expires in: 30 days
 ```
 
+</details>
+<br/>
+
+<details>
+<summary>SonarQube integration in Jenkins Server</summary>
+
 ##### Install Jenkins Plugins
 
 > Install
@@ -443,6 +522,12 @@ Analysis Properties: sonar.projectKey=Onix-Website-Scan
 
 > Dashboard > [JOB_NAME] > "Build Now"
 
+</details>
+<br/>
+
+<details>
+<summary>Docker Server Startup</summary>
+
 ##### Run Docker
 
 > Check if Docker is running
@@ -450,6 +535,12 @@ Analysis Properties: sonar.projectKey=Onix-Website-Scan
 ```
 sudo docker run hello-world
 ```
+
+</details>
+<br/>
+
+<details>
+<summary>Get access to Docker Server from Jenkins Server</summary>
 
 ##### Create SSH Access into Docker-Server on Jenkins server.
 
@@ -528,6 +619,12 @@ jenkins@jenkins:$ ssh ubuntu@$DOCKER_IP
 @docker:$ docker ps // This should run now.
 ```
 
+</details>
+<br/>
+
+<details>
+<summary>Integrate Docker build step in Jenkins</summary>
+
 ##### Create Docker build step in Jenkins
 
 > Dashboard > Manage Jenkins > System > Server groups > Server Group List
@@ -563,9 +660,13 @@ docker build -t mywebsite .
 docker run -d -p 8085:80 --name=Onix-Website mywebsite
 ```
 
+</details>
+<br/>
+
+<details>
+<summary>GCP Network Config for Docker Server</summary>
+
 ##### Run Jenkins Pipeline to start docker nginx server
-
-
 
 ##### Allow Docker port access to internet
 
@@ -589,8 +690,17 @@ gcloud compute firewall-rules create access-docker \
   --target-tags=$DOCKER_NETWORK_TAG
 ```
 
+</details>
+<br/>
+
+<details>
+<summary>Check Website
+</summary>
 ##### Go to Docker IP to check website
 
 ```
 $ echo http://$DOCKER_IP:8085
 ```
+
+</details>
+<br/>
