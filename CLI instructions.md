@@ -7,10 +7,10 @@ https://youtu.be/361bfIvXMBI
 
 ```
 REGION=us-central1
-PROJECT_ID=jenkins-sonarqube-docker-2504
+PROJECT_ID=jenkins-sonarqube-docker-2509
 NETWORK_NAME=jsd-nw
 SUBNET_NAME=jsd-subnet
-STORAGE_BUCKET_NAME=startup-script-bucket-1b
+STORAGE_BUCKET_NAME=startup-script-bucket-1e
 INSTANCE_TEMPLATE_NAME=jsd-instance-template
 JENKINS_INSTANCE_NAME=ci-server
 DOCKER_INSTANCE_NAME=container-server
@@ -192,8 +192,8 @@ gcloud beta compute instance-templates create $INSTANCE_TEMPLATE_NAME \
   --no-restart-on-failure \
   --maintenance-policy=TERMINATE \
   --provisioning-model=SPOT \
-  --instance-termination-action=STOP \
-  --max-run-duration=10800s  \
+  --instance-termination-action=DELETE \
+  --max-run-duration=3600s  \
   --service-account=$SVC_ACCOUNT \
   --scopes=https://www.googleapis.com/auth/devstorage.read_only,https://www.googleapis.com/auth/logging.write,https://www.googleapis.com/auth/monitoring.write,https://www.googleapis.com/auth/servicecontrol,https://www.googleapis.com/auth/service.management.readonly,https://www.googleapis.com/auth/trace.append \
   --region=us-central1 \
@@ -456,7 +456,7 @@ Recommended for projects following regular versions or releases.
 > Go to Admin Profile at top right hand
 > A > My Account > Security > Generate Token
 > _Copy this token and keep it safe_
-> ex. sqp_fb5ea620f218deaca5732133ce6e441be0daef3e
+> ex. sqp_9d9c1f8c3631edaf75c1726a2bd7367e11547b81
 
 ```
 Name: Jenkins-token
@@ -503,7 +503,7 @@ Server URL: $ echo http://$SONARQUBE_SERVER_IP:9000
 
 ```
 Kind: Secret Text
-Secret: [SONAR_TOKEN] ex.sqp_fb5ea620f218deaca5732133ce6e441be0daef3e
+Secret: [SONAR_TOKEN] ex.sqp_9d9c1f8c3631edaf75c1726a2bd7367e11547b81
 ID: sonar-token
 ```
 
