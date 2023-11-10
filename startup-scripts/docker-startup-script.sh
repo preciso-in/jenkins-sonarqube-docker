@@ -21,3 +21,14 @@ sudo apt-get install \
 	docker-buildx-plugin \
 	docker-compose-plugin \
 	-y
+
+sed -i 's/^#PubkeyAuthentication yes$/PubkeyAuthentication yes/' /etc/ssh/sshd_config
+sed -i 's/^PasswordAuthentication no$/PasswordAuthentication yes/' /etc/ssh/sshd_config
+
+systemctl restart sshd
+
+echo ">>>>>>>>>>>>>>>>>>>>>>>>>"
+echo "adding docker permissions to user ubuntu"
+
+sudo usermod -aG docker ubuntu
+newgrp docker
