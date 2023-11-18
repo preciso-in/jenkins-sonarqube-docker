@@ -65,7 +65,8 @@ terraform destroy -auto-approve
 
 ##### Terraform setup
 
-> Setup TF
+> Setup TF:
+> Use terraform backend bucket from admin-tf "poc-tfstate-bucket-xxxxx" and paste it in the terraform _resource_ block.
 
 ```
 terraform init

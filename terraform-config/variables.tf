@@ -1,3 +1,7 @@
+resource "random_id" "random" {
+  byte_length = 4
+}
+
 variable "region" {
   default     = "us-central1"
   description = "Region where the Project will be created"
