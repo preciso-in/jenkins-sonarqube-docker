@@ -37,6 +37,13 @@ $ gcloud compute instances add-metadata my-instance \
     --metadata serial-port-enable=TRUE
 ```
 
+##### Add Git Hook for checking Story-ID in every commit message
+
+```
+$ chmod +x script.sh
+$ sh script.sh
+```
+
 </details>
 <br/>
 

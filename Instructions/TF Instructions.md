@@ -56,6 +56,13 @@ terraform validate
 terraform apply -auto-approve
 ```
 
+##### Add Git Hook for checking Story-ID in every commit message
+
+```
+$ chmod +x script.sh
+$ sh script.sh
+```
+
 </details>
 <br>
 
