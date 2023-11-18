@@ -15,9 +15,8 @@ variable "subnet_name" {
 }
 
 variable "storage_bucket_name" {
-  default     = ""
-  description = "...k"
-  type        = string
+  default = "jsd-storage-bucket"
+  type    = string
 }
 
 variable "instance_template_name" {
@@ -62,6 +61,5 @@ variable "billing_account_id" {
 }
 
 locals {
-  project_id          = "jsd-${random_id.random.hex}"
-  storage_bucket_name = "jsd-storage-bucket-${random_id.random.hex}"
+  storage_bucket_name = "${var.storage_bucket_name}-${random_id.random.hex}"
 }

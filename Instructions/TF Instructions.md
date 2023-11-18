@@ -8,7 +8,30 @@ gcloud auth application-default login
 ```
 
 </details>
-<br>
+ <br>
+
+<details>
+<summary>Environment Variables</summary>
+
+##### Set Environment Variables
+
+```
+REGION=us-central1
+PROJECT_ID=jenkins-sonarqube-docker-2509
+NETWORK_NAME=jsd-nw
+SUBNET_NAME=jsd-subnet
+STORAGE_BUCKET_NAME=startup-script-bucket-1e
+INSTANCE_TEMPLATE_NAME=jsd-instance-template
+JENKINS_INSTANCE_NAME=ci-server
+DOCKER_INSTANCE_NAME=container-server
+SONARQUBE_INSTANCE_NAME=code-scanner-server
+JENKINS_NETWORK_TAG=ci-server
+SONARQUBE_NETWORK_TAG=scanner-server
+DOCKER_NETWORK_TAG=container-server
+```
+
+</details>
+<br/>
 
 <details>
 <summary>Housekeeping (Updates, cleanup)</summary>

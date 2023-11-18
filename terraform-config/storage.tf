@@ -1,12 +1,9 @@
 resource "google_storage_bucket" "jsd-bucket" {
-  name          = local.storage_bucket_name
-  location      = "US"
-  force_destroy = true
-
+  name                        = local.storage_bucket_name
+  location                    = "US"
+  force_destroy               = true
   uniform_bucket_level_access = true
-  project                     = local.project_id
 }
-
 
 resource "google_storage_bucket_object" "docker_script" {
   name   = "docker-startup-script.sh"

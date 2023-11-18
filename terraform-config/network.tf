@@ -1,19 +1,13 @@
 resource "google_compute_network" "vpc_network" {
-  project                 = local.project_id
   name                    = var.network_name
   auto_create_subnetworks = false
 }
-
-// Optional argument "project" is required in block because we create project
-// in our TF config and hence region, project and other details 
-// which are specified are not present in it.
 
 resource "google_compute_subnetwork" "jsd_subnetwork" {
   name          = var.subnet_name
   ip_cidr_range = "10.0.20.0/24"
   region        = var.region
   network       = google_compute_network.vpc_network.id
-  project       = local.project_id
 }
 
 
@@ -27,7 +21,6 @@ resource "google_compute_firewall" "allow_icmp" {
   allow {
     protocol = "icmp"
   }
-  project = local.project_id
 }
 
 resource "google_compute_firewall" "allow_internal" {
@@ -48,7 +41,6 @@ resource "google_compute_firewall" "allow_internal" {
   allow {
     protocol = "icmp"
   }
-  project = local.project_id
 }
 
 resource "google_compute_firewall" "allow_rdp" {
@@ -62,7 +54,6 @@ resource "google_compute_firewall" "allow_rdp" {
     protocol = "tcp"
     ports    = ["3389"]
   }
-  project = local.project_id
 }
 
 resource "google_compute_firewall" "allow_ssh" {
@@ -76,7 +67,6 @@ resource "google_compute_firewall" "allow_ssh" {
     protocol = "tcp"
     ports    = ["22"]
   }
-  project = local.project_id
 }
 
 resource "google_compute_firewall" "allow_jenkins" {
@@ -91,7 +81,6 @@ resource "google_compute_firewall" "allow_jenkins" {
     ports    = ["8080"]
   }
   target_tags = ["${var.jenkins_network_tag}"]
-  project     = local.project_id
 }
 
 resource "google_compute_firewall" "allow_sonarqube" {
@@ -106,7 +95,6 @@ resource "google_compute_firewall" "allow_sonarqube" {
     ports    = ["9000"]
   }
   target_tags = ["${var.sonarqube_network_tag}"]
-  project     = local.project_id
 }
 
 resource "google_compute_firewall" "allow_docker" {
@@ -121,5 +109,4 @@ resource "google_compute_firewall" "allow_docker" {
     ports    = ["8085"]
   }
   target_tags = ["${var.docker_network_tag}"]
-  project     = local.project_id
 }

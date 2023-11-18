@@ -1,6 +1,5 @@
 resource "google_compute_instance_template" "jsd_instance_template" {
   name         = var.instance_template_name
-  project      = local.project_id
   machine_type = "n1-standard-1"
 
   scheduling {
@@ -16,7 +15,6 @@ resource "google_compute_instance_template" "jsd_instance_template" {
     source_image = "projects/ubuntu-os-cloud/global/images/ubuntu-2004-focal-v20230918"
     auto_delete  = true
     boot         = true
-    # size              = 10
     disk_type    = "pd-balanced"
     disk_size_gb = 10
   }
@@ -49,11 +47,10 @@ resource "google_compute_instance_template" "jsd_instance_template" {
 resource "google_service_account" "default" {
   account_id   = "service-account-id"
   display_name = "Service Account"
-  project      = local.project_id
 }
 
 resource "google_project_iam_member" "storage_iam_binding" {
-  project = local.project_id
+  project = data.terraform_remote_state.remote.outputs.poc_project_id
   role    = "roles/storage.objectViewer"
   member  = "serviceAccount:${google_service_account.default.email}"
 }
