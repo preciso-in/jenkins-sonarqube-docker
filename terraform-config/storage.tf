@@ -11,17 +11,17 @@ resource "google_storage_bucket" "jsd-bucket" {
 resource "google_storage_bucket_object" "docker_script" {
   name   = "docker-startup-script.sh"
   bucket = google_storage_bucket.jsd-bucket.name
-  source = "../startup-scripts/docker-startup-script.sh"
+  source = "../vm-startup-scripts/docker-startup-script.sh"
 }
 
 resource "google_storage_bucket_object" "sonarqube_script" {
   name   = "sonarqube-startup-script.sh"
   bucket = google_storage_bucket.jsd-bucket.name
-  source = "../startup-scripts/sonarqube-startup-script.sh"
+  source = "../vm-startup-scripts/sonarqube-startup-script.sh"
 }
 resource "google_storage_bucket_object" "jenkins_script" {
   name   = "jenkins-startup-script.sh"
   bucket = google_storage_bucket.jsd-bucket.name
-  source = "../startup-scripts/jenkins-startup-script.sh"
+  source = "../vm-startup-scripts/jenkins-startup-script.sh"
 }
 
