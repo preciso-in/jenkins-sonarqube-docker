@@ -3,3 +3,4 @@ CLI instructions.txt
 Nilesh_Notes.txt
 .terraform
 *.tfstate*
+*.*old

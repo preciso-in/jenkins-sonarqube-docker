@@ -25,8 +25,11 @@ resource "google_compute_instance_template" "jsd_instance_template" {
   }
 
   network_interface {
-    network    = google_compute_network.vpc_network.name
-    subnetwork = google_compute_subnetwork.jsd_subnetwork.id
+    # network    = google_compute_network.vpc_network.name
+    network = module.vpc.network_name
+
+    # subnetwork = google_compute_subnetwork.jsd_subnetwork.id
+    subnetwork = module.vpc.subnets_ids[0]
     access_config {
       network_tier = "PREMIUM"
     }
