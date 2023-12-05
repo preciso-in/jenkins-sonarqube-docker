@@ -1,4 +1,4 @@
-resource "google_compute_instance_from_template" "jenkins_tpl" {
+resource "google_compute_instance_from_template" "jenkins" {
   name                     = var.jenkins_instance_name
   zone                     = "${var.region}-a"
   source_instance_template = google_compute_instance_template.jsd_instance_template.self_link_unique
@@ -9,7 +9,7 @@ resource "google_compute_instance_from_template" "jenkins_tpl" {
   }
 }
 
-resource "google_compute_instance_from_template" "sonarqube_tpl" {
+resource "google_compute_instance_from_template" "sonarqube" {
   name                     = var.sonarqube_instance_name
   zone                     = "${var.region}-a"
   source_instance_template = google_compute_instance_template.jsd_instance_template.self_link_unique
@@ -20,7 +20,7 @@ resource "google_compute_instance_from_template" "sonarqube_tpl" {
   }
 }
 
-resource "google_compute_instance_from_template" "docker_tpl" {
+resource "google_compute_instance_from_template" "docker" {
   name                     = var.docker_instance_name
   zone                     = "${var.region}-a"
   source_instance_template = google_compute_instance_template.jsd_instance_template.self_link_unique
