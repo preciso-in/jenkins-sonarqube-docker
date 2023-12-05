@@ -1,119 +1,112 @@
-module "vpc" {
-  source  = "terraform-google-modules/network/google"
-  version = "~> 8.0"
-
-  project_id   = data.terraform_remote_state.remote.outputs.poc_project_id
-  network_name = var.network_name
-
-  subnets = [{
-    subnet_name   = "${var.subnet_name}"
-    subnet_ip     = "10.10.20.0/24"
-    subnet_region = var.region
-  }]
+resource "google_compute_network" "vpc_network" {
+  name                    = var.network_name
+  auto_create_subnetworks = false
 }
 
-module "firewall" {
-  source = "terraform-google-modules/network/google//modules/firewall-rules"
+resource "google_compute_subnetwork" "jsd_subnetwork" {
+  name          = var.subnet_name
+  ip_cidr_range = "10.0.20.0/24"
+  region        = var.region
+  network       = google_compute_network.vpc_network.id
+}
 
-  project_id   = data.terraform_remote_state.remote.outputs.poc_project_id
-  network_name = module.vpc.network_name
 
-  rules = [
-    {
-      name          = "allow-jenkins-module"
-      description   = "Allow jenkins traffic"
-      direction     = "INGRESS"
-      priority      = 1000
-      action        = "ALLOW"
-      source_ranges = ["0.0.0.0/0"]
-      target_tags   = ["${var.jenkins_network_tag}"]
-      allow = [{
-        protocol = "tcp"
-        ports    = ["8080"]
-      }]
-    },
-    {
-      name          = "allow-sonarqube"
-      description   = "Allow sonarqube traffic"
-      direction     = "INGRESS"
-      priority      = 1000
-      action        = "ALLOW"
-      source_ranges = ["0.0.0.0/0"]
-      target_tags   = ["${var.sonarqube_network_tag}"]
-      allow = [{
-        protocol = "tcp"
-        ports    = ["9000"]
-      }]
-    },
-    {
-      name          = "allow-docker"
-      description   = "Allow docker traffic"
-      direction     = "INGRESS"
-      priority      = 1000
-      action        = "ALLOW"
-      source_ranges = ["0.0.0.0/0"]
-      target_tags   = ["${var.docker_network_tag}"]
-      allow = [{
-        protocol = "tcp"
-        ports    = ["9000"]
-      }]
-    },
-    {
-      name          = "allow-ssh"
-      description   = "Allow SSH traffic"
-      direction     = "INGRESS"
-      priority      = 65534
-      action        = "ALLOW"
-      source_ranges = ["0.0.0.0/0"]
-      target_tags   = ["ssh"]
-      allow = [{
-        protocol = "tcp"
-        ports    = ["22"]
-      }]
-    },
-    {
-      name          = "allow-internal"
-      description   = "Allow Internal traffic"
-      direction     = "INGRESS"
-      priority      = 65534
-      action        = "ALLOW"
-      source_ranges = ["10.128.0.0/9"]
-      allow = [
-        {
-          protocol = "tcp"
-          ports    = ["0-65535"]
-        },
-        {
-          protocol = "udp"
-          ports    = ["0-65535"]
-        },
-        {
-          protocol = "icmp"
-        }
-      ]
-    },
-    {
-      name          = "allow-icmp"
-      description   = "Allow icmp traffic"
-      direction     = "INGRESS"
-      priority      = 65534
-      action        = "ALLOW"
-      source_ranges = ["0.0.0.0/0"]
-      allow = [{
-        protocol = "icmp"
-      }]
-    },
-    {
-      name          = "allow-rdp"
-      description   = "Allow rdp traffic"
-      direction     = "INGRESS"
-      priority      = 65534
-      action        = "ALLOW"
-      source_ranges = ["0.0.0.0/0"]
-      allow = [{
-        protocol = "tcp"
-        ports    = ["3389"]
-      }]
-    }
-  ]
+resource "google_compute_firewall" "allow_icmp" {
+  name          = "allow-icmp"
+  direction     = "INGRESS"
+  priority      = 65534
+  network       = google_compute_network.vpc_network.id
+  source_ranges = ["0.0.0.0/0"]
+
+  allow {
+    protocol = "icmp"
+  }
+}
+
+resource "google_compute_firewall" "allow_internal" {
+  name          = "allow-internal"
+  direction     = "INGRESS"
+  priority      = 65534
+  network       = google_compute_network.vpc_network.id
+  source_ranges = ["10.128.0.0/9"]
+
+  allow {
+    protocol = "tcp"
+    ports    = ["0-65535"]
+  }
+  allow {
+    protocol = "udp"
+    ports    = ["0-65535"]
+  }
+  allow {
+    protocol = "icmp"
+  }
+}
+
+resource "google_compute_firewall" "allow_rdp" {
+  name          = "allow-rdp"
+  direction     = "INGRESS"
+  priority      = 65534
+  network       = google_compute_network.vpc_network.id
+  source_ranges = ["0.0.0.0/0"]
+
+  allow {
+    protocol = "tcp"
+    ports    = ["3389"]
+  }
+}
+
+resource "google_compute_firewall" "allow_ssh" {
+  name          = "allow-ssh"
+  direction     = "INGRESS"
+  priority      = 65534
+  network       = google_compute_network.vpc_network.id
+  source_ranges = ["0.0.0.0/0"]
+
+  allow {
+    protocol = "tcp"
+    ports    = ["22"]
+  }
+}
+
+resource "google_compute_firewall" "allow_jenkins" {
+  name          = "allow-jenkins"
+  direction     = "INGRESS"
+  priority      = 1000
+  network       = google_compute_network.vpc_network.id
+  source_ranges = ["0.0.0.0/0"]
+
+  allow {
+    protocol = "tcp"
+    ports    = ["8080"]
+  }
+  target_tags = ["${var.jenkins_network_tag}"]
+}
+
+resource "google_compute_firewall" "allow_sonarqube" {
+  name          = "allow-sonarqube"
+  direction     = "INGRESS"
+  priority      = 1000
+  network       = google_compute_network.vpc_network.id
+  source_ranges = ["0.0.0.0/0"]
+
+  allow {
+    protocol = "tcp"
+    ports    = ["9000"]
+  }
+  target_tags = ["${var.sonarqube_network_tag}"]
+}
+
+resource "google_compute_firewall" "allow_docker" {
+  name          = "allow-docker"
+  direction     = "INGRESS"
+  priority      = 1000
+  network       = google_compute_network.vpc_network.id
+  source_ranges = ["0.0.0.0/0"]
+
+  allow {
+    protocol = "tcp"
+    ports    = ["8085"]
+  }
+  target_tags = ["${var.docker_network_tag}"]
 }
