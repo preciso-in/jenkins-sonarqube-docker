@@ -1,0 +1,22 @@
+name: Destroy Terraform Resources
+
+on:
+  workflow_dispatch:
+
+jobs:
+  destroy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+        with:
+          branch: temp-github-action
+
+      - name: Set up Terraform
+        uses: hashicorp/setup-terraform@v1
+
+      - name: Destroy resources
+        run: |
+          terraform init
+          terraform destroy -auto-approve
