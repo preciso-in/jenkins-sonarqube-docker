@@ -4,3 +4,8 @@ Nilesh_Notes.txt
 .terraform
 *.tfstate*
 *.*old
+
+node_modules
+.vscode
+scripts/getInputs/ts-jest.log
+scripts/CLI_Scripts/working/

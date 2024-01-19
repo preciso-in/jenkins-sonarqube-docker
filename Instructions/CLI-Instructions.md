@@ -1,57 +1,14 @@
-https://youtu.be/361bfIvXMBI
-
-<details>
-<summary>Environment Variables</summary>
-
-##### Set Environment Variables
-
-```
-REGION=us-central1
-PROJECT_ID=jenkins-sonarqube-docker-2509
-NETWORK_NAME=jsd-nw
-SUBNET_NAME=jsd-subnet
-STORAGE_BUCKET_NAME=startup-script-bucket-1e
-INSTANCE_TEMPLATE_NAME=jsd-instance-template
-JENKINS_INSTANCE_NAME=ci-server
-DOCKER_INSTANCE_NAME=container-server
-SONARQUBE_INSTANCE_NAME=code-scanner-server
-JENKINS_NETWORK_TAG=ci-server
-SONARQUBE_NETWORK_TAG=scanner-server
-DOCKER_NETWORK_TAG=container-server
-```
-
-</details>
-<br/>
-
 <details>
 
-<summary>Housekeeping commands</summary>
+<summary>GCP commands you may need in addition to script </summary>
 
-##### Instance lifecycle commands
-
-```
-$ gcloud compute instances stop my-instance
-$ gcloud compute instances start my-instance
-$ gcloud compute instances describe INSTANCE_NAME --format="get(status)"
-$ gcloud compute instances add-metadata my-instance \
-    --metadata serial-port-enable=TRUE
-```
-
-##### Add Git Hook for checking Story-ID in every commit message
+##### Log in to GCP
 
 ```
-$ chmod +x script.sh
-$ sh script.sh
+gcloud auth login
 ```
 
-</details>
-<br/>
-
-<details>
-
-<summary>Set up Project & GCloud CLI</summary>
-
-##### Create project
+##### Create project in GCP
 
 ```
 gcloud projects create $PROJECT_ID
@@ -72,97 +29,21 @@ gcloud billing projects link $PROJECT_ID \
   --billing-account=$BILLING_ACCT_ID
 ```
 
-##### Enable compute engine api
+##### Instance lifecycle commands
 
 ```
-gcloud services enable compute.googleapis.com --quiet
+$ gcloud compute instances stop my-instance
+$ gcloud compute instances start my-instance
+$ gcloud compute instances describe INSTANCE_NAME --format="get(status)"
+$ gcloud compute instances add-metadata my-instance \
+    --metadata serial-port-enable=TRUE
 ```
 
-##### Get service account email id created with project
+##### Add Git Hook for checking Story-ID in every commit message
 
 ```
-SVC_ACCOUNT=$(gcloud iam service-accounts list --format="value(email)")
-echo $SVC_ACCOUNT
-```
-
-##### Set Default Region and Zone on gcloud
-
-```
-gcloud config set compute/region $REGION
-gcloud config set compute/zone $REGION-a
-```
-
-</details>
-<br/>
-
-<details>
-<summary>Reset default project settings</summary>
-
-##### Delete VPC firewall rules
-
-```
-gcloud compute firewall-rules list
-gcloud compute firewall-rules delete default-allow-icmp --quiet
-gcloud compute firewall-rules delete default-allow-internal --quiet
-gcloud compute firewall-rules delete default-allow-rdp --quiet
-gcloud compute firewall-rules delete default-allow-ssh --quiet
-```
-
-##### Delete default VPC
-
-```
-gcloud compute networks list
-gcloud compute networks delete default --quiet
-```
-
-##### Create new VPC
-
-```
-gcloud compute networks create $NETWORK_NAME \
-  --subnet-mode=custom
-```
-
-##### Create new subnet in above VPC
-
-```
-gcloud compute networks subnets create $SUBNET_NAME \
-  --network=$NETWORK_NAME \
-  --range=10.0.20.0/24 \
-  --region=$REGION
-```
-
-##### Create VPC firewall rules to allow debugging and internal communication
-
-```
-gcloud compute firewall-rules create allow-icmp \
-  --direction=INGRESS \
-  --priority=65534 \
-  --network=$NETWORK_NAME \
-  --source-ranges=0.0.0.0/0 \
-  --action=ALLOW \
-  --rules=ICMP
-gcloud compute firewall-rules create allow-internal \
-  --action=ALLOW \
-  --direction=INGRESS \
-  --priority=65534 \
-  --network=$NETWORK_NAME \
-  --source-ranges=10.128.0.0/9 \
-  --rules=tcp:0-65535,udp:0-65535,icmp
-gcloud compute firewall-rules create allow-rdp \
-  --direction=INGRESS \
-  --priority=65534 \
-  --network=$NETWORK_NAME \
-  --source-ranges=0.0.0.0/0 \
-  --action=ALLOW \
-  --rules=tcp:3389
-gcloud compute firewall-rules create allow-ssh \
-  --direction=INGRESS \
-  --priority=65534 \
-  --network=$NETWORK_NAME \
-  --source-ranges=0.0.0.0/0 \
-  --action=ALLOW \
-  --rules=tcp:22
-gcloud compute firewall-rules list
+$ chmod +x script.sh
+$ sh script.sh
 ```
 
 </details>
@@ -382,7 +263,7 @@ cd /usr/local/sonarqube-10.2.0.77647/bin/linux-x86-64/
 
 ##### Create firewall-rule to allow access to Sonarqube Server
 
-> Add network tag for firewall-rule to apply to Jenkins Server
+> Add network tag for firewall-rule to apply to Sonarqube Server
 
 ```
 gcloud compute instances add-tags $SONARQUBE_INSTANCE_NAME \
