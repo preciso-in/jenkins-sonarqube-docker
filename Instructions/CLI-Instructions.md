@@ -1,14 +1,14 @@
 # Instructions to setup GCP deployment that uses a VM to serve website
 
 Switch to ./scripts folder on your terminal and follow instructions below.
-You can update default values by changing default values listed in default-env.sh
+You can update default values by changing default values listed in default-values.sh
 
 ```
 cd scripts
 chmod +x gcloud-cli.sh
 export PATH=$PATH:${pwd}
 gcloud-cli.sh
-source default-env.sh
+source default-values.sh
 ```
 
 <details>
@@ -58,10 +58,15 @@ sudo cat /var/lib/jenkins/secrets/initialAdminPassword
 exit
 ```
 
-##### Create Jenkins User
+##### Install default plugins
 
+```
 > Go to $JENKINS_SERVER_IP:8080
 > Input Jenkins InitialAdminPassword
+> Install Default plugins
+```
+
+##### Create Jenkins User
 
 ```
 user: Nilesh
@@ -87,7 +92,7 @@ https://github.com/nparkhe83/jenkins-sonarqube-docker.git
 echo http://$JENKINS_SERVER_IP:8080/github-webhook/
 ```
 
-> Select "Pushes" and "Pull Requests" in "Which events would you like to trigger this webhook?" > "Let me select individual events."
+> In "Which events would you like to trigger this webhook?" > "Let me select individual events." > Select "Pushes" and "Pull Requests"
 
 </details>
 <br/>
@@ -242,7 +247,15 @@ Analysis Properties: sonar.projectKey=Onix-Website-Scan
 > Check if Docker is running
 
 ```
+gcloud compute ssh $DOCKER_INSTANCE_NAME
 sudo docker run hello-world
+```
+
+> Create password for Ubuntu user
+
+```
+sudo passwd ubuntu
+12345
 ```
 
 </details>
@@ -286,12 +299,6 @@ PasswordAuthentication yes
 
 ```
 # systemctl restart sshd
-```
-
-> Add ubuntu user password in Docker server
-
-```
-# passwd ubuntu // ex. 12345
 ```
 
 > Try SSH again from jenkins server to ssh

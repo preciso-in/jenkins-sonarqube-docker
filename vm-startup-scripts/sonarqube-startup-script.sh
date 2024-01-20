@@ -8,6 +8,8 @@ cd /usr/local
 wget https://binaries.sonarsource.com/Distribution/sonarqube/sonarqube-10.2.0.77647.zip
 unzip sonarqube-10.2.0.77647.zip
 
+rm -f sonarqube-10.2.0.77647.zip
+
 chown nileshparkhe -R sonarqube-10.2.0.77647/
 
 # Following commands will not work because of restrictions on root user.
