@@ -21,10 +21,6 @@ How to run: Run ./scripts/gcloud-cli.sh to create GCP resources required to depl
 
 Then follow the instructions provided in ./Instructions/CLI-Instructions.md to complete setup of Jenkins, Sonarqube & Docker servers.
 
-### Use Terraform IaC configuration to deploy GCP resources
-
-Use Instructions from ./Instructions/TF-Instructions.md to deploy the site using Terraform
-
 ### Miscellaneous
 
 ##### Provide Defaults in ./default-values.txt if you do not want to provide input flags.
