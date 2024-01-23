@@ -17,7 +17,7 @@ create_instances() {
 	gsutil cp ../vm-startup-scripts/sonarqube-startup-script.sh gs://$BUCKET_ID &>/dev/null
 	gsutil cp ../vm-startup-scripts/docker-startup-script.sh gs://$BUCKET_ID &>/dev/null
 
-	source ./CLI_scripts/create-instance-template.sh
+	source ./modules/create-instance-template.sh
 	create_instance_template
 
 	print_yellow "\nCreating Jenkins instance"

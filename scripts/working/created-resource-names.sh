@@ -1,0 +1,12 @@
+export PROJECT_ID=a-very-rand-om-project1
+export REGION=us-central1
+export BUCKET_ID=a-very-rand-om-project1-sb1
+export NETWORK_NAME=jsd-nw
+export SUBNET_NAME=jsd-subnet
+export INSTANCE_TEMPLATE_NAME=jsd-instance-template
+export JENKINS_INSTANCE_NAME=ci-server
+export DOCKER_INSTANCE_NAME=container-server
+export SONARQUBE_INSTANCE_NAME=code-scanner-server
+export JENKINS_NETWORK_TAG=ci-server
+export SONARQUBE_NETWORK_TAG=scanner-server
+export DOCKER_NETWORK_TAG=container-server

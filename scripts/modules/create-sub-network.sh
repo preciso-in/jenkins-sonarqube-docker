@@ -18,7 +18,7 @@ create_sub_network() {
 	gcloud compute networks subnets create $SUBNET_NAME \
 		--network=$NETWORK_NAME \
 		--range=10.0.20.0/24 \
-		--region=$REGION || {
+		--region=$REGION &>/dev/null || {
 		print_red "Failed to create sub-network. Please check for errors."
 		exit 1
 	}

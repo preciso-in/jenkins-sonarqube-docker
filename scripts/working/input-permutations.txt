@@ -1,0 +1,36 @@
+gcloud-cli.sh
+gcloud-cli.sh --use-defaults
+gcloud-cli.sh --use-defaults --bucket-id bucket_idFlag
+gcloud-cli.sh --use-defaults --bucket-id bucket_idFlag --project-id project_idFlag
+gcloud-cli.sh --use-defaults --bucket-id bucket_idFlag --project-id project_idFlag --region regionFlag
+
+gcloud-cli.sh --use-defaults --project-id project_idFlag
+
+gcloud-cli.sh --use-defaults --project-id project_idFlag --region regionFlag
+
+gcloud-cli.sh --use-defaults --bucket-id bucket_idFlag --region regionFlag
+
+gcloud-cli.sh --region regionFlag
+
+gcloud-cli.sh --bucket-id bucket_idFlag
+
+gcloud-cli.sh --bucket-id bucket_idFlag --project-id project_idFlag
+
+gcloud-cli.sh --bucket-id bucket_idFlag --project-id project_idFlag --region regionFlag
+
+gcloud-cli.sh --project-id project_idFlag
+
+gcloud-cli.sh --project-id project_idFlag --region regionFlag
+
+gcloud-cli.sh --bucket-id bucket_idFlag --region regionFlag
+
+# flags without values - treat them as non-existent and use defaults for them.
+gcloud-cli.sh --region
+
+gcloud-cli.sh --region --bucket-id
+
+gcloud-cli.sh --region --bucket-id --project-id
+
+gcloud-cli.sh --region regionFlag --bucket-id --project-id
+
+

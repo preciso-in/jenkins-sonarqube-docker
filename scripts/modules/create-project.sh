@@ -1,4 +1,4 @@
-source ./CLI_scripts/utils.sh
+source ./modules/utils.sh
 
 create_project() {
 

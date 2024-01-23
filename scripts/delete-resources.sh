@@ -4,23 +4,18 @@ trap 'echo "${BASH_SOURCE[0]}: line ${LINENO}: status ${?}: user ${USER}: func $
 ################################################################################
 #               Create App Resources on GCP with GCloud CLI                    #
 #                                                                              #
-# This script creates Google Cloud resources for deployment of a simple        #
+# This script deletes Google Cloud resources created by this repo              #
 #                                                                              #
 # Requirements:                                                                #
-# - node                                                                       #
 # - gcloud                                                                     #
 #                                                                              #
 # Usage: 																																		   #
-# ./scripts/gcloud-cli.sh \ 																									 #
-#   --use-defaults \ 																												   #
-#   --project-id <project-id> \  																							 #
-#   --region <region> \ 																											 #
-#   --bucket-id <storage-bucket-id> \ 														 #
+# ./scripts/delete-resources.sh  																							 #
 #                                                                              #
 # Change History                                                               #
-# 11/01/2024  Nilesh Parkhe   Working script that creates Networks,            #
-#                             Firewall rules and VM Servers to deploy a        #
-#                             Website to the internet.                         #
+# 20/01/2024  Nilesh Parkhe   Working script that deletes Networks,            #
+#                             Firewall rules and VM Servers that are           #
+#                             created by create-resources.sh                   #
 #                                                                              #
 #                                                                              #
 ################################################################################
@@ -52,33 +47,12 @@ set -e
 
 # TODO: Check if node, npm and gcloud are installed
 
-source ./CLI_Scripts/utils.sh
-source ./CLI_Scripts/config.sh
+source ./modules/utils.sh
 
-source ./getInputs/process-arguments.sh
-handle_arguments $@
+#TODO: Save name of computed variables used by create-resources.sh
+source ./working/created-resource-names.sh
 
-source ./CLI_Scripts/working/input-variables.sh
-
-# Read default values
-source ./default-values.sh
-
-if [[ "$PROJECT_ID_ARGS" != "[USE_DEFAULT]" ]]; then
-	PROJECT_ID="$PROJECT_ID_ARGS"
-fi
-if [[ "$REGION_ARGS" != "[USE_DEFAULT]" ]]; then
-	REGION="$REGION_ARGS"
-fi
-if [[ "$BUCKET_ID_ARGS" != "[USE_DEFAULT]" ]]; then
-	BUCKET_ID="$BUCKET_ID_ARGS"
-fi
-
-echo -e "\n\n"
-echo "PROJECT_ID: $PROJECT_ID"
-echo "REGION: $REGION"
-echo "BUCKET_ID: $BUCKET_ID"
-
-source ./CLI_Scripts/check-gcp-login.sh
+source ./modules/check-gcp-login.sh
 
 active_account=$(check_active_account)
 
@@ -90,37 +64,26 @@ else
 	active_account=$(check_active_account)
 fi
 
-get_billing_account
+source ./modules/delete-instances.sh
+delete_instances
 
-source ./CLI_Scripts/check-available-projects-quota.sh
-check_available_projects_quota
+source ./modules/delete-instance-templates.sh
+delete_instance_templates
 
-source ./CLI_Scripts/create-project.sh
-create_project
+source ./modules/delete-startup-scripts.sh
+delete_startup_scripts
 
-source ./CLI_Scripts/enable-compute-api.sh
-enable_compute_api
+source ./modules/delete-bucket.sh
+delete_bucket
 
-source ./CLI_Scripts/update-gcloud-config.sh
-update_gcloud_config
+source ./modules/delete-firewall-rules.sh
+delete_firewall_rules
 
-source ./CLI_Scripts/get-service-account.sh
-get_service_account
+source ./modules/delete-subnetwork.sh
+delete_subnets
 
-source ./CLI_Scripts/delete-default-firewall-rules.sh
-delete_default_firewall_rules
+source ./modules/delete-network.sh
+delete_network
 
-source ./CLI_Scripts/delete-default-network.sh
-delete_default_network
-
-source ./CLI_Scripts/create-vpc-network.sh
-create_vpc_network
-
-source ./CLI_Scripts/create-sub-network.sh
-create_sub_network
-
-source ./CLI_Scripts/create-firewall-rules.sh
-create_firewall_rules
-
-source ./CLI_Scripts/create-instances.sh
-create_instances
+source ./modules/delete-project.sh
+delete_project

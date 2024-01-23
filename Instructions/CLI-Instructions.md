@@ -5,10 +5,10 @@ You can update default values by changing default values listed in default-value
 
 ```
 cd scripts
-chmod +x gcloud-cli.sh
+chmod +x create-resources.sh
 export PATH=$PATH:${pwd}
-gcloud-cli.sh
-source default-values.sh
+create-resources.sh
+source ./working/created-resource-names.sh
 ```
 
 <details>

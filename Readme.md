@@ -17,7 +17,7 @@ What: Using GCloud CLI, the script achieves the following objectives:</summary>
 </details>
 <br>
 
-How to run: Run ./scripts/gcloud-cli.sh to create GCP resources required to deploy this app.
+How to run: Run ./scripts/create-resources.sh to create GCP resources required to deploy this app.
 
 Then follow the instructions provided in ./Instructions/CLI-Instructions.md to complete setup of Jenkins, Sonarqube & Docker servers.
 

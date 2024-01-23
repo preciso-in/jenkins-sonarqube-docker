@@ -58,7 +58,7 @@ create_firewall_rules() {
 		print_green "Created Firewall rule allow-rdp"
 	fi
 
-	# Check and create firewall rule allow-rdp
+	# Check and create firewall rule allow-ssh
 	if gcloud compute firewall-rules describe allow-ssh &>/dev/null; then
 		print_green "Firewall rule allow-ssh already exists"
 	else
