@@ -4,7 +4,7 @@ delete_network() {
 	print_yellow "\nDeleting network..."
 
 	if gcloud compute networks describe $NETWORK_NAME &>/dev/null; then
-		gcloud compute networks delete $NETWORK_NAME --quiet || {
+		gcloud compute networks delete $NETWORK_NAME --quiet &>/dev/null || {
 			print_red "Error deleting $NETWORK_NAME. Please check for errors."
 			exit 1
 		}

@@ -73,11 +73,6 @@ if [[ "$BUCKET_ID_ARGS" != "[USE_DEFAULT]" ]]; then
 	BUCKET_ID="$BUCKET_ID_ARGS"
 fi
 
-echo -e "\n\n"
-echo "PROJECT_ID: $PROJECT_ID"
-echo "REGION: $REGION"
-echo "BUCKET_ID: $BUCKET_ID"
-
 source ./modules/check-gcp-login.sh
 
 active_account=$(check_active_account)

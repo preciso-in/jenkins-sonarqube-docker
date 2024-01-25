@@ -6,7 +6,7 @@ enable_compute_api() {
 		return
 	fi
 
-	gcloud services enable compute.googleapis.com --quiet --project $PROJECT_ID || {
+	gcloud services enable compute.googleapis.com --quiet --project $PROJECT_ID &>/dev/null || {
 		print_red "Error enabling Compute API"
 		exit 1 # Terminate the script with an error
 	}
