@@ -16,13 +16,13 @@ delete_default_network() {
 		response="yes"
 	else
 		echo -e "\n"
-		read -p "Are you sure you want to delete these networks? (yes/no) " response
+		read -p "Are you sure you want to delete the default network? (yes/no) " response
 	fi
 
 	if [[ $response =~ ^([yY][eE][sS]|[yY])$ ]]; then
 		gcloud compute networks delete default --quiet &>/dev/null || {
-			}
-		done
+			print_red "Failed to delete network: default. Please check for errors."
+		}
 		print_green "Default Network deleted."
 		return
 	fi
