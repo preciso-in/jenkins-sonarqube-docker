@@ -1,21 +1,10 @@
 create_instances() {
 
-	# Create storage bucket to store startup scripts
-	# Check if storage bucket exists
-	print_yellow "\nCreating Storage bucket to store instance start up scripts"
-	if gcloud storage buckets describe gs://${BUCKET_ID} &>/dev/null; then
-		print_green "Storage bucket $BUCKET_ID already exists."
-	else
-		gsutil mb -l ${REGION} gs://${BUCKET_ID} || {
-			print_red "Error creating storage bucket. Please check for errors."
-			exit 1
-		}
-		print_green "Created storage bucket: $BUCKET_ID"
-	fi
+	source ./modules/create-bucket.sh
+	create_bucket
 
-	gsutil cp ../vm-startup-scripts/jenkins-startup-script.sh gs://$BUCKET_ID &>/dev/null
-	gsutil cp ../vm-startup-scripts/sonarqube-startup-script.sh gs://$BUCKET_ID &>/dev/null
-	gsutil cp ../vm-startup-scripts/docker-startup-script.sh gs://$BUCKET_ID &>/dev/null
+	source ./modules/copy-startup-files-to-bucket.sh
+	copy_startup_files_to_bucket
 
 	source ./modules/create-instance-template.sh
 	create_instance_template
