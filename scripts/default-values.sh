@@ -1,5 +1,7 @@
-export PROJECT_ID=a-very-rand-om-project1
+project=jsd-with-gcloud
+
+export PROJECT_ID=$project
 export REGION=us-central1
-export BUCKET_ID=a-very-rand-om-project1-sb1
+export BUCKET_ID="$project-sb"
 
 source ./modules/config.sh

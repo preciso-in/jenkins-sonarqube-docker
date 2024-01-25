@@ -93,11 +93,11 @@ check_available_projects_quota
 source ./modules/create-project.sh
 create_project
 
-source ./modules/enable-compute-api.sh
-enable_compute_api
-
 source ./modules/update-gcloud-config.sh
 update_gcloud_config
+
+source ./modules/enable-compute-api.sh
+enable_compute_api
 
 source ./modules/get-service-account.sh
 get_service_account

@@ -1,6 +1,6 @@
-export PROJECT_ID=a-very-rand-om-project1
+export PROJECT_ID=jsd-with-gcloud
 export REGION=us-central1
-export BUCKET_ID=a-very-rand-om-project1-sb1
+export BUCKET_ID=jsd-with-gcloud-sb
 export NETWORK_NAME=jsd-nw
 export SUBNET_NAME=jsd-subnet
 export INSTANCE_TEMPLATE_NAME=jsd-instance-template
