@@ -1,6 +1,6 @@
 create_instance_template() {
-
 	print_yellow "\nCreating instance template $INSTANCE_TEMPLATE_NAME"
+
 	if gcloud compute instance-templates describe $INSTANCE_TEMPLATE_NAME &>/dev/null; then
 		print_green "Instance template $INSTANCE_TEMPLATE_NAME Already exists"
 	else
