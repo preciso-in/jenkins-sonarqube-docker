@@ -1,5 +1,7 @@
 #!/bin/bash
 
-cp .githooks/commit-msg .git/hooks/commit-msg
+cd ..
+
+cp githooks/commit-msg .git/hooks/commit-msg
 
 chmod +x .git/hooks/commit-msg
