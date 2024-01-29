@@ -1,8 +1,5 @@
 #!/bin/bash
 
-cat >.git/hooks/commit-msg <<EOF
-#!/bin/bash
-.githooks/commit-msg
-EOF
+cp .githooks/commit-msg .git/hooks/commit-msg
 
 chmod +x .git/hooks/commit-msg
