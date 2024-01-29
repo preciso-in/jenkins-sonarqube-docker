@@ -45,6 +45,9 @@ set -e
 # Print command before executing
 # set -x
 
+script_dir=$(dirname "$(realpath "$0")")
+cd "$script_dir"
+
 # TODO: Check if node, npm and gcloud are installed
 
 source ./modules/utils.sh

@@ -1,5 +1,4 @@
 #!/bin/bash
-trap 'echo "${BASH_SOURCE[0]}: line ${LINENO}: status ${?}: user ${USER}: func ${FUNCNAME[0]}"' ERR
 
 ################################################################################
 #               Create App Resources on GCP with GCloud CLI                    #
@@ -49,6 +48,10 @@ trap 'echo "${BASH_SOURCE[0]}: line ${LINENO}: status ${?}: user ${USER}: func $
 set -e
 # Print command before executing
 # set -x
+
+trap 'echo "${BASH_SOURCE[0]}: line ${LINENO}: status ${?}: user ${USER}: func ${FUNCNAME[0]}"' ERR
+script_dir=$(dirname "$(realpath "$0")")
+cd "$script_dir"
 
 # TODO: Check if node, npm and gcloud are installed
 
